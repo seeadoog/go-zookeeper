@@ -1,6 +1,8 @@
 package zk
 
 import (
+	"encoding/base64"
+	"fmt"
 	"reflect"
 	"testing"
 )
@@ -60,6 +62,17 @@ func TestEncodeShortBuffer(t *testing.T) {
 		t.Errorf("encodePacket should return ErrShortBuffer on a short buffer instead of '%+v'", err)
 		return
 	}
+}
+
+func TestDecode(t *testing.T) {
+	bs, err := base64.StdEncoding.DecodeString("AAAAAAAAAAcAARtT////kA==")
+	if err != nil {
+		t.Errorf("base64 decoding failed %+v", err)
+	}
+	r := &connectResponse{}
+	fmt.Println(bs)
+	_, err = decodePacket(bs, r)
+	fmt.Println(err)
 }
 
 func TestDecodeShortBuffer(t *testing.T) {

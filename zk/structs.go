@@ -412,8 +412,8 @@ func decodePacket(buf []byte, st interface{}) (n int, err error) {
 			if e, ok := r.(runtime.Error); ok && strings.HasPrefix(e.Error(), "runtime error: slice bounds out of range") {
 				err = ErrShortBuffer
 			} else {
-				//panic(r)
-				err = fmt.Errorf("unexpected panic: %v", r)
+				panic(r)
+				//err = fmt.Errorf("unexpected panic: %v", r)
 			}
 		}
 	}()
@@ -506,7 +506,7 @@ func encodePacket(buf []byte, st interface{}) (n int, err error) {
 				err = ErrShortBuffer
 
 			} else {
-				err = fmt.Errorf("unexpected error: %v", r)
+				panic(r)
 			}
 		}
 	}()

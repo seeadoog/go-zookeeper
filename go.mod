@@ -1,3 +1,3 @@
 module github.com/seeadoog/go-zookeeper
 
-go 1.24.9
+go 1.18
