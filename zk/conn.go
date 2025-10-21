@@ -108,7 +108,8 @@ type Conn struct {
 	logger  Logger
 	logInfo bool // true if information messages are logged; false if only errors are logged
 
-	buf []byte
+	buf       []byte
+	onceClose sync.Once
 }
 
 // connOption represents a connection option.
@@ -310,12 +311,14 @@ func WithMaxConnBufferSize(maxBufferSize int) connOption {
 }
 
 func (c *Conn) Close() {
-	close(c.shouldQuit)
+	c.onceClose.Do(func() {
+		close(c.shouldQuit)
+		select {
+		case <-c.queueRequest(opClose, &closeRequest{}, &closeResponse{}, nil):
+		case <-time.After(time.Second):
+		}
+	})
 
-	select {
-	case <-c.queueRequest(opClose, &closeRequest{}, &closeResponse{}, nil):
-	case <-time.After(time.Second):
-	}
 }
 
 // State returns the current state of the connection.

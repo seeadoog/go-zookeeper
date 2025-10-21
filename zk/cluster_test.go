@@ -1,6 +1,7 @@
 package zk
 
 import (
+	"fmt"
 	"sync"
 	"testing"
 	"time"
@@ -311,5 +312,19 @@ func (ew *EventWatcher) Wait(timeout time.Duration) *Event {
 func sessionStateMatcher(s State) func(Event) bool {
 	return func(e Event) bool {
 		return e.Type == EventSession && e.State == s
+	}
+}
+
+func TestChannel(t *testing.T) {
+	shouldQuit := make(chan bool)
+	go func() {
+		time.Sleep(time.Millisecond * 1000)
+
+		close(shouldQuit)
+	}()
+	_, closed := <-shouldQuit
+	if !closed {
+		close(shouldQuit)
+		fmt.Println("closed channel")
 	}
 }

@@ -1,8 +1,10 @@
 package zk
 
 import (
+	"encoding/base64"
 	"encoding/binary"
 	"errors"
+	"fmt"
 	"log"
 	"reflect"
 	"runtime"
@@ -405,10 +407,13 @@ type encoder interface {
 func decodePacket(buf []byte, st interface{}) (n int, err error) {
 	defer func() {
 		if r := recover(); r != nil {
+			fmt.Println("server panic when receive invalid data at decode state:", base64.StdEncoding.EncodeToString(buf), "err", r)
+
 			if e, ok := r.(runtime.Error); ok && strings.HasPrefix(e.Error(), "runtime error: slice bounds out of range") {
 				err = ErrShortBuffer
 			} else {
-				panic(r)
+				//panic(r)
+				err = fmt.Errorf("unexpected panic: %v", r)
 			}
 		}
 	}()
@@ -496,10 +501,12 @@ func decodePacketValue(buf []byte, v reflect.Value) (int, error) {
 func encodePacket(buf []byte, st interface{}) (n int, err error) {
 	defer func() {
 		if r := recover(); r != nil {
+			fmt.Println("server panic when receive invalid data:", base64.StdEncoding.EncodeToString(buf), "err", r)
 			if e, ok := r.(runtime.Error); ok && strings.HasPrefix(e.Error(), "runtime error: slice bounds out of range") {
 				err = ErrShortBuffer
+
 			} else {
-				panic(r)
+				err = fmt.Errorf("unexpected error: %v", r)
 			}
 		}
 	}()
